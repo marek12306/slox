@@ -1,0 +1,19 @@
+var file = File("./filetest.txt")
+    .open(true, true, true, true)
+
+file.truncate()
+file.write("testing")
+print file
+file.close()
+print file
+
+file.open(true, false, false, false)
+
+for (var r = file.read(2); r != nil; r = file.read(2))
+    print r
+
+error("b")
+
+print file
+file.close()
+print file

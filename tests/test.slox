@@ -1,0 +1,40 @@
+class Bruh {
+    init() {
+        this.x = "a"
+        fun x() {
+            print "a"
+        }
+    }
+
+    printt() {
+        print this.x
+    }
+
+    twoplustwo() {
+        return 2 + 2 * 2
+    }
+
+    logic() {
+        print true and false
+        print true or false
+    }
+
+    group() {
+        print (2 + 2) * 2
+    }
+
+    fivetimes(fn) {
+        for (var i = 0; i < 5; i=i+1) fn(i)
+    }
+}
+
+var bruh = Bruh()
+bruh.printt()
+print bruh.twoplustwo()
+bruh.logic()
+bruh.group()
+bruh.fivetimes(fun (i) {
+    print i
+})
+
+print 2>3;

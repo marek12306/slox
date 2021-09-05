@@ -1,0 +1,10 @@
+var time1 = clock()
+var f = File("tests/bee.txt").open({
+    read: true
+})
+var str = ""
+for (var x = f.read(1); x != nil; x = f.read(1)) {
+    str = str + x
+}
+time1 = clock() - time1
+print time1

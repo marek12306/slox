@@ -1,0 +1,10 @@
+var bruh = clock()
+for (each range(0,100000) as x) {
+    x
+}
+print clock() - bruh
+bruh = clock()
+for (var x = 0; x < 100000; x=x+1) {
+    x
+}
+print clock() - bruh
