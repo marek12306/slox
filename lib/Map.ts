@@ -53,7 +53,7 @@ export let sloxMapClass = async (interpreter: Interpreter, env?: Environment) =>
                 let arr = self.fields.get("_values") as Map<any, any>
                 let f = (args[0] as SloxFunction).bind(self)
                 for (let item of arr)
-                    if (f.call(interpreter, [
+                    if (await f.call(interpreter, [
                         (await sloxListClass(interpreter, [item[0], item[1]]) as SloxClass)
                             .call(interpreter, [])
                     ])) return null

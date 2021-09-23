@@ -62,7 +62,7 @@ export let sloxListClass = async (interpreter: Interpreter, values: any[] = [], 
                 let arr = self.fields.get("_values") as Array<any>
                 let f = (args[0] as SloxFunction).bind(self)
                 for (let item of arr)
-                    if (f.call(interpreter, [item])) return null
+                    if (await f.call(interpreter, [item])) return null
                 return null
             },
             arity: 1
