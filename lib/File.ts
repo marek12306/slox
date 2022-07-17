@@ -41,11 +41,11 @@ export let sloxFileClass = (interpreter: Interpreter, env?: Environment) =>
                 let obj = args[0] as SloxInstance
                 self.fields.set("_opened", 
                     Deno.openSync(self.fields.get("name"), {
-                        read: obj.fields.get("read"),
-                        write: obj.fields.get("write"),
-                        append: obj.fields.get("append"),
-                        create: obj.fields.get("create"),
-                        truncate: obj.fields.get("truncate"),
+                        read: obj.fields.get("read") == "true",
+                        write: obj.fields.get("write") == "true",
+                        append: obj.fields.get("append") == "true",
+                        create: obj.fields.get("create") == "true",
+                        truncate: obj.fields.get("truncate") == "true",
                         mode: obj.fields.get("mode"),
                     }))
                 return self

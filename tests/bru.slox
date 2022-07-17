@@ -1,0 +1,3 @@
+interval(fun() {
+    print 5
+}, 500)

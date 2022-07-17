@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 import { Token, TokenType } from "../types/Token.ts"
 import { Environment, RuntimeError } from "../base/InterpreterBase.ts"
 import { SloxCallable } from "../types/SloxCallable.ts"
@@ -10,6 +11,7 @@ import { sloxFileLib } from "./File.ts"
 import { sloxIterableLib, sloxMapIterableClass } from "./Iterable.ts"
 import { sloxJSONLib } from "./JSON.ts"
 import { sloxHTTPLib } from "./HTTP.ts"
+import { sloxWebSocketLib } from "./WebSocket.ts"
 import { SloxFunction } from "../types/SloxFunction.ts"
 import { SloxClass } from "../types/SloxClass.ts"
 import { SloxInstance } from "../types/SloxInstance.ts"
@@ -36,6 +38,30 @@ export async function loadStdLib(interpreter: Interpreter) {
             if (!klass) return false
         }
     }, 2)
+    interpreter.globals.setFunc("timeout", async (interpreter: Interpreter, argumentss: any[]) => {
+        let func = argumentss[0] as SloxFunction
+        let timeout = argumentss[1]
+        setTimeout(() => {
+            func.call(interpreter, [])
+        }, timeout)
+    }, 2)
+    interpreter.globals.setFunc("interval", async (interpreter: Interpreter, argumentss: any[]) => {
+        let func = argumentss[0] as SloxFunction
+        let timeout = argumentss[1]
+        setInterval(() => {
+            func.call(interpreter, [])
+        }, timeout)
+    }, 2)
+    interpreter.globals.setFunc("has", async (interpreter: Interpreter, argumentss: any[]) => {
+        let obj = argumentss[0] as SloxInstance
+        let field = argumentss[1]
+        return obj.fields.has(field)
+    }, 2)
+    interpreter.globals.setFunc("get", async (interpreter: Interpreter, argumentss: any[]) => {
+        let obj = argumentss[0] as SloxInstance
+        let field = argumentss[1]
+        return obj.fields.get(field)
+    }, 2)
     interpreter.globals.setFunc("range", async (interpreter: Interpreter, argumentss: any[]) =>
         (await sloxListClass(interpreter, range(argumentss[0], argumentss[1])) as SloxClass).call(interpreter, []), 2)
     await sloxMapLib(interpreter)
@@ -46,9 +72,10 @@ export async function loadStdLib(interpreter: Interpreter) {
     await sloxIterableLib(interpreter)
     await sloxJSONLib(interpreter)
     await sloxHTTPLib(interpreter)
+    await sloxWebSocketLib(interpreter)
 }
 
-export type LibMethods = { [name: string]: { func: (args: any[], self: SloxInstance) => Promise<any>, arity?: number } }
+export type LibMethods = { [name: string]: { func: (args: any[], self: SloxInstance) => any, arity?: number } }
 export async function generateLibClass(name: string, instance: boolean, 
                                 env: Environment, methods: LibMethods,
                                 interpreter?: Interpreter, superclass?: SloxClass) {
@@ -93,13 +120,15 @@ let stringifyFields = (fields: IterableIterator<[any, any]>, interpreter: Interp
 
 let setObj = async (fields: Map<string, any>, obj: any, interpreter: Interpreter, env?: Environment) => {
     for (let i in obj) {
-        if (obj[i] instanceof SloxInstance && obj[i].klass.name == "Object") {
+        if (obj[i] instanceof SloxFunction || typeof(obj[i]) == "number") {
+            fields.set(i, obj[i])
+        } else if (obj[i] instanceof SloxInstance && obj[i].klass.name == "Object") {
             fields.set(i, await generateObject(Object.fromEntries(obj[i].fields), interpreter, env ?? interpreter.environment))
         } else if (!(obj[i] instanceof SloxInstance) && !(obj[i] instanceof Array) && obj[i] instanceof Object) {
             fields.set(i, await generateObject(obj[i], interpreter, env ?? interpreter.environment))
         } else if (obj[i] instanceof SloxInstance && (obj[i].klass.name == "List" || obj[i].klass.name == "Map")) {
             fields.set(i, obj[i])
-        } else {
+        } else if (obj) {
             fields.set(i, await interpreter.prettyStringify(obj[i]))
         }
     }

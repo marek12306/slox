@@ -14,14 +14,14 @@ export let sloxListLib = async (interpreter: Interpreter) => {
 export let sloxListClass = async (interpreter: Interpreter, values: any[] = [], env?: Environment) =>
     generateLibClass("List", false, env ?? interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 self.klass.superclass?.findMethod("init")?.bind(self).call(interpreter, [])
                 self.fields.set("_values", values)
                 return self
             }
         },
         append: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 arr.push(args[0])
                 return self
@@ -29,7 +29,7 @@ export let sloxListClass = async (interpreter: Interpreter, values: any[] = [], 
             arity: 1
         },
         set: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 arr[args[0]] = args[1]
                 return self
@@ -37,23 +37,26 @@ export let sloxListClass = async (interpreter: Interpreter, values: any[] = [], 
             arity: 2
         },
         shift: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 if (arr.length == 0) return null
-                return arr.shift()
+                self.fields.set("_values", arr.shift())
+                return self
             }
         },
         pop: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 if (arr.length == 0) return null
-                return arr.pop()
+                self.fields.set("_values", arr.pop())
+                return self
             }
         },
         slice: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
-                return arr.slice(args[0], args[1])
+                self.fields.set("_values", arr.slice(args[0], args[1] ?? Infinity))
+                return self
             },
             arity: 2
         },
@@ -68,32 +71,42 @@ export let sloxListClass = async (interpreter: Interpreter, values: any[] = [], 
             arity: 1
         },
         get: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 return arr[args[0]] ?? null
             },
             arity: 1
         },
         iterget: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return self.getPermissive("get").call(interpreter, args)
             },
             arity: 1
         },
         length: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 return arr.length
             }
         },
         last: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 return arr[arr.length-1] ?? null
             }
         },
+        join: {
+            func: (args: any[], self: SloxInstance) => {
+                let arr = self.fields.get("_values") as Array<any>
+                return arr.map(x => {
+                    if (x === null) return `nil`
+                    return x
+                }).join(args[0])
+            },
+            arity: 1
+        },
         string: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 return `[${arr.map(x => {
                     if (x === null) return `nil`
@@ -103,7 +116,7 @@ export let sloxListClass = async (interpreter: Interpreter, values: any[] = [], 
             }
         },
         _default: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let arr = self.fields.get("_values") as Array<any>
                 if (interpreter.isInt(args[0])) {
                     if (args[1]) {

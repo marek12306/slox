@@ -37,7 +37,7 @@ export let sloxStringClassInstance = async (interpreter: Interpreter) =>
         },
         substring: {
             func: async (args: any[], self: SloxInstance) => {
-                return args[0].toString(interpreter).substring(args[1], args[2])
+                return args[0].toString(interpreter).substring(args[1], args[2] ?? Infinity)
             },
             arity: 3
         },

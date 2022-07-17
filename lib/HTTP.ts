@@ -32,16 +32,21 @@ export let sloxHTTPClass = async (interpreter: Interpreter, env?: Environment) =
             },
             arity: 0
         },
-        postJSON: {
+        header: {
+            func: async (args: any[], self: SloxInstance) => {
+                self.fields.get("headers").fields.set(args[0], args[1])
+            },
+            arity: 2
+        },
+        post: {
             func: async (args: any[], self: SloxInstance) => {
                 let f = await fetch(self.fields.get("url"), {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(await objFromSloxInstance(self.fields.get("headers"), interpreter))
-                    },
+                    method: "POST",
+                    headers: await objFromSloxInstance(self.fields.get("headers"), interpreter),
                     body: args[0]
                 })
                 return await f.text()
-            }
+            },
+            arity: 1
         }
     })

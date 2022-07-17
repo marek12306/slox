@@ -98,11 +98,11 @@ export let sloxIterableClass = (interpreter: Interpreter, env?: Environment) =>
 
 let iterError = async (message: string, interpreter: Interpreter, env?: Environment) => new SloxError(
     new Token(TokenType.EOF, '', null, interpreter.line),
-    (await loxIterErrorClass(interpreter, env ?? interpreter.environment) as SloxClass)
+    (await sloxIterErrorClass(interpreter, env ?? interpreter.environment) as SloxClass)
         .call(interpreter, [message])
 )
 
-export let loxIterErrorClass = (interpreter: Interpreter, env?: Environment) =>
+export let sloxIterErrorClass = (interpreter: Interpreter, env?: Environment) =>
     generateLibClass("IterError", false, env ?? interpreter.environment, {
         init: {
             func: async (args: any[], self: SloxInstance) => {

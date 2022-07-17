@@ -21,7 +21,7 @@ export class Slox {
     runtimeError(error: Error) {
         if (error instanceof RuntimeError) {
             Deno.stderr.writeSync(new TextEncoder().encode(`slox.ts: [line ${error.token.line}] RuntimeError: ${error.message}\n`))
-        } else Deno.stderr.writeSync(new TextEncoder().encode(error.toString()))
+        } else Deno.stderr.writeSync(new TextEncoder().encode(error.stack))
         this.hadRuntimeError = true
     }
 

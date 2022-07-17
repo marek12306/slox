@@ -1,1 +1,1 @@
-JSON.parse(HTTP("https://jsonplaceholder.typicode.com/photos", {}).get())
+print JSON.parse(HTTP("https://jsonplaceholder.typicode.com/photos", {}).get())

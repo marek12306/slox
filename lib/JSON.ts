@@ -35,7 +35,6 @@ export let sloxJSONClass = (interpreter: Interpreter, env?: Environment) =>
         generate: {
             func: async (args: any[], self: SloxInstance) => {
                 let arg = args[0]
-                console.log("ARGG", arg.fields.get("d"))
                 let input: any
                 if (arg instanceof SloxInstance)
                     input = await objFromSloxInstance(arg, interpreter)
@@ -49,13 +48,14 @@ export let objFromSloxInstance = async (arg: any, interpreter: Interpreter) => {
     let tmp: any = {}
     // console.log(arg)
     for (let [k, v] of arg.fields) {
-        console.log(k, v)
         if (v instanceof SloxInstance) {
             if (v.klass.name == "Object") {
                 tmp[k] = await objFromSloxInstance(v, interpreter)
             } else if (v.klass.name == "List" || v.klass.name == "Map") {
                 tmp[k] = v.fields.get("_values")
             }
+        } else if (typeof(v) == "number") {
+            tmp[k] = v
         } else {
             tmp[k] = await interpreter.prettyStringify(v)
         }
