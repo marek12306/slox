@@ -64,7 +64,7 @@ export let objFromSloxInstance = async (arg: any, interpreter: Interpreter) => {
                 }
                 tmp[k] = fields
             } else if (v.klass.name == "Map") {
-                let fields = {}
+                let fields: Record<any, any> = {}
                 for (let [key, val] of v.fields.get("_values")) {
                     if (val instanceof SloxInstance) {
                         fields[key] = await objFromSloxInstance(val, interpreter)
