@@ -39,7 +39,7 @@ tryCatchStmt   → "try" statement "catch" IDENTIFIER? statement ;
 block          → "{" declaration* "}" ;
 
 object         → "{" objectValue* "}" ;
-objectValue    → IDENTIFIER ":" expression ","? ;
+objectValue    → expression ":" expression ","? ;
 
 exprStmt       → expression ";"? ;
 printStmt      → "print" expression ";"? ;

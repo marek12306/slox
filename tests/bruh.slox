@@ -1,6 +1,6 @@
 var time1 = clock()
 var f = File("tests/bee.txt").open({
-    read: true
+    "read": true
 })
 var str = ""
 for (var x = f.read(1); x != nil; x = f.read(1)) {

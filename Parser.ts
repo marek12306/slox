@@ -213,9 +213,8 @@ export class Parser extends ParserBase {
         let names = []
         let values = []
         while (!this.match(TokenType.RIGHT_BRACE)) {
-            names.push(this.consume(TokenType.IDENTIFIER,
-                "Expect identifier."))
-            this.consume(TokenType.COLON, "Expect colon after identifier.")
+            names.push(await this.expression())
+            this.consume(TokenType.COLON, "Expect colon after expression.")
             values.push(await this.expression())
             this.consumeOptional(TokenType.COMMA)
         }

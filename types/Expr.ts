@@ -209,10 +209,10 @@ export class LFunction extends Expr {
 }
 
 export class LObject extends Expr {
-    names: Token[]
+    names: Expr[]
     values: Expr[]
 
-    constructor(names: Token[], values: Expr[]) {
+    constructor(names: Expr[], values: Expr[]) {
         super()
         this.names = names
         this.values = values

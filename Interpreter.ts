@@ -114,7 +114,7 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
     async visitLObjectExpr(expr: LObject) {
         let obj: any = {}
         for (let i in expr.names)
-            obj[expr.names[i].lexeme] = await expr.values[i].accept(this)
+            obj[expr.names[i].accept(this)] = await expr.values[i].accept(this)
         return await generateObject(obj, this)
     }
 

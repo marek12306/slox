@@ -140,7 +140,7 @@ export class AstPrinter implements ExprVisitor<String>, StmtVisitor<string> {
         let i = 0
         let val = []
         for (let name of expr.names) {
-            val.push(`(= ${name.lexeme} ${expr.values[i].accept(this)})`)
+            val.push(`(= ${name.accept(this)} ${expr.values[i].accept(this)})`)
             i++
         }
         return `(object ${val.join(' ')})`

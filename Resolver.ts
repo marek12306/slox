@@ -139,6 +139,8 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
 
     visitLObjectExpr(expr: LObject) {
+        for (let name of expr.names)
+            this.resolve(name)
         for (let value of expr.values)
             this.resolve(value)
         return null
