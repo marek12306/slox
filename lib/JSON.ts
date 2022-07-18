@@ -51,8 +51,30 @@ export let objFromSloxInstance = async (arg: any, interpreter: Interpreter) => {
         if (v instanceof SloxInstance) {
             if (v.klass.name == "Object") {
                 tmp[k] = await objFromSloxInstance(v, interpreter)
-            } else if (v.klass.name == "List" || v.klass.name == "Map") {
-                tmp[k] = v.fields.get("_values")
+            } else if (v.klass.name == "List") {
+                let fields = []
+                for (let val of v.fields.get("_values")) {
+                    if (val instanceof SloxInstance) {
+                        fields.push(await objFromSloxInstance(val, interpreter))
+                    } else if (typeof(val) == "number") {
+                        fields.push(val)
+                    } else {
+                        fields.push(await interpreter.prettyStringify(v))
+                    }
+                }
+                tmp[k] = fields
+            } else if (v.klass.name == "Map") {
+                let fields = {}
+                for (let [key, val] of v.fields.get("_values")) {
+                    if (val instanceof SloxInstance) {
+                        fields[key] = await objFromSloxInstance(val, interpreter)
+                    } else if (typeof(val) == "number") {
+                        fields[key] = val
+                    } else {
+                        fields[key] = await interpreter.prettyStringify(val)
+                    }
+                }
+                tmp[k] = fields
             }
         } else if (typeof(v) == "number") {
             tmp[k] = v

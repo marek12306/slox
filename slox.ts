@@ -2,7 +2,7 @@ import { Token, TokenType } from "./types/Token.ts"
 import { Scanner } from "./Scanner.ts"
 import { Parser } from "./Parser.ts"
 import { AstPrinter } from "./AstPrinter.ts"
-import { RuntimeError } from "./base/InterpreterBase.ts"
+import { Environment, RuntimeError } from "./base/InterpreterBase.ts"
 import { Interpreter } from "./Interpreter.ts"
 import { Resolver } from "./Resolver.ts"
 
@@ -25,11 +25,15 @@ export class Slox {
         this.hadRuntimeError = true
     }
 
-    async run(source: string, indepent = false, interpret = true) {
-        let interpreter
+    async run(source: string, indepent = false, interpret = true, environment: Environment|null = null) {
+        let interpreter, old_env
         if (indepent) {
             interpreter = new Interpreter(this)
-        } else interpreter = this.interpreter
+        } else {
+            interpreter = this.interpreter
+            if (environment)
+                old_env = this.interpreter.environment
+        }
         const scanner = new Scanner(source, this)
         const tokens: Token[] = scanner.scanTokens()
         // console.log(tokens)
@@ -49,9 +53,18 @@ export class Slox {
 
         console.log(new AstPrinter().print(statements))
         if (interpret) {
-            await interpreter.loadStdLib()
-            return await interpreter.interpret(statements)
-        } else return statements
+            if (!environment) {
+                await interpreter.loadStdLib()
+            } else {
+                interpreter.environment = environment
+            }
+            let output = await interpreter.interpret(statements)
+            if (old_env) interpreter.environment = old_env
+            return output
+        } else {
+            if (old_env) interpreter.environment = old_env
+            return statements
+        }
     }
 
     async runPrompt() {

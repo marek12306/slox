@@ -15,6 +15,9 @@ import { sloxWebSocketLib } from "./WebSocket.ts"
 import { SloxFunction } from "../types/SloxFunction.ts"
 import { SloxClass } from "../types/SloxClass.ts"
 import { SloxInstance } from "../types/SloxInstance.ts"
+import { Scanner } from "../Scanner.ts"
+import { Parser } from "../Parser.ts"
+import { Resolver } from "../Resolver.ts"
 
 let range = (start: number, end: number) => 
     Array(end - start + 1).fill(0).map((_, idx) => start + idx)
@@ -28,8 +31,22 @@ export async function loadStdLib(interpreter: Interpreter) {
         String.fromCharCode(argumentss[0]), 1)
     interpreter.globals.setFunc("exit", async (interpreter: Interpreter, argumentss: any[]) =>
         Deno.exit(argumentss[0]), 1)
-    interpreter.globals.setFunc("eval", async (interpreter: Interpreter, argumentss: any[]) =>
-        interpreter.slox.run(argumentss[0]), 1)
+    interpreter.globals.setFunc("eval", async (interpreter: Interpreter, argumentss: any[]) => {
+        const scanner = new Scanner(argumentss[0], interpreter.slox)
+        const tokens: Token[] = scanner.scanTokens()
+
+        const parser = new Parser(tokens, interpreter.slox)
+        const statements = await parser.parse()
+
+        if (interpreter.slox.hadError) return null
+
+        let resolver = new Resolver(interpreter, interpreter.slox)
+        resolver.resolveStmts(statements)
+        
+        if (interpreter.slox.hadError) return null
+
+        return await interpreter.interpret(statements)
+    }, 1)
     interpreter.globals.setFunc("instanceof", async (interpreter: Interpreter, argumentss: any[]) => {
         let klass = argumentss[0].klass as SloxClass|null|undefined
         while (true) {
@@ -62,6 +79,12 @@ export async function loadStdLib(interpreter: Interpreter) {
         let field = argumentss[1]
         return obj.fields.get(field)
     }, 2)
+    interpreter.globals.setFunc("set", async (interpreter: Interpreter, argumentss: any[]) => {
+        let obj = argumentss[0] as SloxInstance
+        let field = argumentss[1]
+        let val = argumentss[2]
+        return obj.fields.set(field, val)
+    }, 3)
     interpreter.globals.setFunc("range", async (interpreter: Interpreter, argumentss: any[]) =>
         (await sloxListClass(interpreter, range(argumentss[0], argumentss[1])) as SloxClass).call(interpreter, []), 2)
     await sloxMapLib(interpreter)
