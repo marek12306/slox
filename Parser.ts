@@ -119,7 +119,7 @@ export class Parser extends ParserBase {
     }
 
     async exprPropertyAccess() {
-        let prop = await this.primary()
+        let prop = await this.expression()
         this.consume(TokenType.RIGHT_SQRBRACKET,
             "Expect '>' after expression.")
         return prop

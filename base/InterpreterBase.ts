@@ -153,7 +153,7 @@ export class InterpreterBase {
         if (distance != undefined && !isNaN(distance)) {
             return this.environment.getAt(distance, name)
         } else {
-            return this.globals.tokenGet(name)
+            return this.environment.tokenGet(name)
         }
     }
 

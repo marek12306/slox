@@ -311,7 +311,7 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
             name = expr.name.lexeme
             token = expr.name
         } else {
-            name = await expr.name.accept(this)
+            name = await this.evaluate(expr.name)
             token = expr.token
         }
         this.line = token.line
