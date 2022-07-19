@@ -62,7 +62,7 @@ primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "super" "." IDENTIFIER | import ;
 funDecl        → "fun" function | logic_or ;
 import         → "import" STRING ;
-function       → IDENTIFIER? "(" parameters? ")" block ;
+function       → IDENTIFIER? "(" parameters? ")" statement ;
 parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
 list           → "[" listContent? "]" ;
 listContent    → exression ( "," expression )* ;

@@ -51,7 +51,7 @@ export class Slox {
             if (this.hadError) return null
         }
 
-        console.log(new AstPrinter().print(statements))
+        //console.log(new AstPrinter().print(statements))
         if (interpret) {
             if (!environment) {
                 await interpreter.loadStdLib()

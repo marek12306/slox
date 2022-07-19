@@ -239,13 +239,13 @@ export class Parser extends ParserBase {
         return new Throw(this.previous(), value)
     }
 
-    async block(func?: boolean) {
+    async block() {
         let statements: Stmt[] = []
         while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd())
             statements.push(await this.declaration())
 
         let statement = statements.pop()
-        if (func && statement instanceof Expression)
+        if (statement instanceof Expression)
             statement = new Return(
                 new Token(TokenType.RETURN, "return", null, this.peek().line), 
                 statement.expression)
@@ -440,7 +440,7 @@ export class Parser extends ParserBase {
         if (this.check(TokenType.IDENTIFIER))
             name = this.advance()
 
-        this.consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.")
+            this.consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.")
         let parameters = []
         if (!this.check(TokenType.RIGHT_PAREN))
             do {
@@ -451,9 +451,16 @@ export class Parser extends ParserBase {
                     this.consume(TokenType.IDENTIFIER, "Expect parameter name."))
             } while (this.match(TokenType.COMMA))
 
-        this.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
-        this.consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.")
-        let body = await this.block(klass ? (name?.lexeme != "init") : true)
+            this.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+        let body = [await this.statement()]
+
+        let statement = body.pop()
+        if (statement instanceof Expression)
+            statement = new Return(
+                new Token(TokenType.RETURN, "return", null, this.peek().line), 
+                statement.expression)
+        if (statement) body.push(statement as Stmt)
+
         return new LFunction(name, parameters, body)
     }
 

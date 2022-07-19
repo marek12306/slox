@@ -143,7 +143,7 @@ let stringifyFields = (fields: IterableIterator<[any, any]>, interpreter: Interp
 
 let setObj = async (fields: Map<string, any>, obj: any, interpreter: Interpreter, env?: Environment) => {
     for (let i in obj) {
-        if (obj[i] instanceof SloxFunction || typeof(obj[i]) == "number") {
+        if (obj[i] instanceof SloxFunction || typeof(obj[i]) == "number" || typeof(obj[i]) == "boolean") {
             fields.set(i, obj[i])
         } else if (obj[i] instanceof SloxInstance && obj[i].klass.name == "Object") {
             fields.set(i, await generateObject(Object.fromEntries(obj[i].fields), interpreter, env ?? interpreter.environment))
@@ -162,6 +162,16 @@ export function generateObject(obj: any, interpreter: Interpreter, env?: Environ
         init: {
             func: async (args: any[], self: SloxInstance) => {
                 await setObj(self.fields, obj, interpreter, env)
+            }
+        },
+        fields: {
+            func: async (args: any[], self: SloxInstance) => {
+                return (await sloxListClass(interpreter, Array.from(self.fields.keys())) as SloxClass).call(interpreter, [])
+            }
+        },
+        values: {
+            func: async (args: any[], self: SloxInstance) => {
+                return (await sloxListClass(interpreter, Array.from(self.fields.values())) as SloxClass).call(interpreter, [])
             }
         },
         string: {
