@@ -1,5 +1,5 @@
-import { ExprVisitor, Expr, Binary, Grouping, Literal, Unary, Assign, Variable, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command } from "./types/Expr.ts"
-import { Stmt, StmtVisitor, Print, Expression, Var, Block, If, While, Return, Class, Try, Throw } from "./types/Stmt.ts"
+import { ExprVisitor, Expr, Binary, Grouping, Literal, Unary, Assign, Variable, Logical, Call, Get, Set, Print, This, LFunction, List, LObject, Super, Command, If } from "./types/Expr.ts"
+import { Stmt, StmtVisitor, Expression, Var, Block, While, Return, Class, Try, Throw } from "./types/Stmt.ts"
 import { SloxInstance } from "./types/SloxInstance.ts"
 import { Token, TokenType } from "./types/Token.ts"
 
@@ -59,7 +59,7 @@ export class AstPrinter implements ExprVisitor<String>, StmtVisitor<string> {
         return this.parenthesize("throw", stmt.expression)
     }
 
-    visitIfStmt(stmt: If): string {
+    visitIfExpr(stmt: If): string {
         let elseBranch = stmt.elseBranch?.accept(this)
         if (elseBranch) {
             elseBranch = ' ' + elseBranch
@@ -104,7 +104,7 @@ export class AstPrinter implements ExprVisitor<String>, StmtVisitor<string> {
         return this.parenthesize(expr.operator.lexeme, expr.right)
     }
 
-    visitPrintStmt(expr: Print) {
+    visitPrintExpr(expr: Print) {
         return this.parenthesize("print", expr.expression)
     }
 

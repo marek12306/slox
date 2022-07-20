@@ -1,8 +1,8 @@
 import { Token, TokenType } from "./types/Token.ts"
-import { Expr, Binary, Unary, Literal, Grouping, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command } from "./types/Expr.ts"
+import { Expr, Binary, Unary, Literal, Print, Grouping, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command, If } from "./types/Expr.ts"
 import { Slox } from "./slox.ts"
 import { ParserBase } from "./base/ParserBase.ts"
-import { Stmt, Print, Expression, Var, Block, If, While, Return, Break, Class, Try, Throw } from "./types/Stmt.ts"
+import { Stmt,Expression, Var, Block, While, Return, Break, Class, Try, Throw } from "./types/Stmt.ts"
 import { Scanner } from "./Scanner.ts"
 import { Resolver } from "./Resolver.ts"
 
@@ -166,19 +166,26 @@ export class Parser extends ParserBase {
             "Expect filename string after 'import'.")
         try {
             var file = Deno.readFileSync(filename.literal as string)
-        } catch { 
+        } catch {
             throw this.error(keyword, 
                 "No such file or directory.")
         }
 
         let statements = await this.slox.run(new TextDecoder().decode(file), true, false) as Stmt[]|null
 
-        if (!statements) return new Call(new LFunction(null, [], []), keyword, [])
+        let call = statements 
+            ? new Call(new LFunction(null, [], statements), keyword, []) 
+            : new Call(new LFunction(null, [], []), keyword, [])
 
-        return new Call(new LFunction(null, [], statements), keyword, [])
+        if (this.consumeOptional(TokenType.AS)) {
+            let identifier = this.consume(TokenType.IDENTIFIER, "Expect identifier after 'as'.")
+            return new Var(identifier, call)
+        } else {
+            return call
+        }
     }
 
-    async primary() {
+    async primary(): Expr {
         if (this.match(TokenType.FALSE)) return new Literal(false)
         if (this.match(TokenType.TRUE)) return new Literal(true)
         if (this.match(TokenType.NIL)) return new Literal(null)
@@ -205,6 +212,8 @@ export class Parser extends ParserBase {
             return new Super(keyword, method)
         }
         if (this.match(TokenType.IMPORT)) return await this.import()
+        if (this.match(TokenType.IF)) return await this.ifExpression()
+        if (this.match(TokenType.PRINT)) return await this.printExpression()
 
         throw this.error(this.peek(), "Expect expression.")
     }
@@ -227,7 +236,7 @@ export class Parser extends ParserBase {
         return new Expression(expr)
     }
 
-    async printStatement() {
+    async printExpression() {
         let value = await this.expression()
         this.consumeOptional(TokenType.SEMICOLON)
         return new Print(value)
@@ -244,18 +253,11 @@ export class Parser extends ParserBase {
         while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd())
             statements.push(await this.declaration())
 
-        let statement = statements.pop()
-        if (statement instanceof Expression)
-            statement = new Return(
-                new Token(TokenType.RETURN, "return", null, this.peek().line), 
-                statement.expression)
-        if (statement) statements.push(statement as Stmt)
-
         this.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
     }
 
-    async ifStatement() {
+    async ifExpression() {
         let condition = await this.expression()
 
         let thenBranch = await this.statement()
@@ -398,9 +400,7 @@ export class Parser extends ParserBase {
     async statement(): Promise<Stmt> {
         if (this.match(TokenType.WHILE)) return await this.whileStatement()
         if (this.match(TokenType.FOR)) return await this.forStatement()
-        if (this.match(TokenType.IF)) return await this.ifStatement()
         if (this.match(TokenType.TRY)) return await this.tryStatement()
-        if (this.match(TokenType.PRINT)) return await this.printStatement()
         if (this.match(TokenType.THROW)) return await this.throwStatement()
         if (this.match(TokenType.RETURN)) return await this.returnStatement()
         if (this.match(TokenType.BREAK)) return await this.breakStatement()
@@ -440,18 +440,19 @@ export class Parser extends ParserBase {
         if (this.check(TokenType.IDENTIFIER))
             name = this.advance()
 
-            this.consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.")
         let parameters = []
-        if (!this.check(TokenType.RIGHT_PAREN))
-            do {
-                if (parameters.length >= 255)
-                    this.error(this.peek(), "Can't have more than 255 parameters.")
+        if (this.consumeOptional(TokenType.LEFT_PAREN)) {
+            if (!this.check(TokenType.RIGHT_PAREN))
+                do {
+                    if (parameters.length >= 255)
+                        this.error(this.peek(), "Can't have more than 255 parameters.")
 
-                parameters.push(
-                    this.consume(TokenType.IDENTIFIER, "Expect parameter name."))
-            } while (this.match(TokenType.COMMA))
+                    parameters.push(
+                        this.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+                } while (this.match(TokenType.COMMA))
 
             this.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+        }
         let body = [await this.statement()]
 
         let statement = body.pop()

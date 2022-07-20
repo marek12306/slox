@@ -18,6 +18,8 @@ export interface ExprVisitor<R> {
     visitLogicalExpr(expr: Logical): R;
     visitUnaryExpr(expr: Unary): R;
     visitVariableExpr(expr: Variable): R;
+    visitIfExpr(expr: If): R;
+    visitPrintExpr(expr: Print): R;
 }
 
 export abstract class Expr {
@@ -265,6 +267,36 @@ export class Variable extends Expr {
 
     accept<R>(visitor: ExprVisitor<R>): R {
         return visitor.visitVariableExpr(this)
+    }
+}
+
+export class If extends Expr {
+    condition: Expr
+    thenBranch: Stmt
+    elseBranch: Stmt|null
+
+    constructor(condition: Expr, thenBranch: Stmt, elseBranch: Stmt|null) {
+        super()
+        this.condition = condition
+        this.thenBranch = thenBranch
+        this.elseBranch = elseBranch
+    }
+
+    accept<R>(visitor: ExprVisitor<R>): R {
+        return visitor.visitIfExpr(this)
+    }
+}
+
+export class Print extends Expr {
+    expression: Expr
+
+    constructor(expression: Expr) {
+        super()
+        this.expression = expression
+    }
+
+    accept<R>(visitor: ExprVisitor<R>): R {
+        return visitor.visitPrintExpr(this)
     }
 }
 

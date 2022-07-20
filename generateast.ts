@@ -11,9 +11,7 @@ generate(Deno.args[0], "Stmt", {
     "Block": [["statements", "Stmt[]"]],
     "Class": [["name","Token"],["superclass","Variable|null"],["methods","LFunction[]"]],
     "Expression": [["expression", "Expr"]],
-    "If": [["condition", "Expr"],["thenBranch","Stmt"],["elseBranch","Stmt|null"]],
     "Try": [["tryBranch","Stmt"],["errIdentifier","Token|null"],["catchBranch","Stmt"]],
-    "Print" : [["expression", "Expr"]],
     "Return": [["keyword","Token"],["value","Expr|null"]],
     "Break": [["keyword","Token"]],
     "Var": [["name", "Token"], ["initializer", "Expr"]],
@@ -36,10 +34,12 @@ generate(Deno.args[0], "Expr", {
     "Command": [["value", "string"]],
     "List": [["token","Token"],["values", "Expr[]"]],
     "LFunction": [["name","Token|null"],["params","Token[]"],["body","Stmt[]"]],
-    "LObject": [["names","Token[]"],["values","Expr[]"]],
+    "LObject": [["names","Expr[]"],["values","Expr[]"]],
     "Logical": [["left", "Expr"],["operator","Token"],["right","Expr"]],
     "Unary": [["operator", "Token"], ["right", "Expr"]],
-    "Variable": [["name", "Token"]]
+    "Variable": [["name", "Token"]],
+    "If": [["condition", "Expr"],["thenBranch","Stmt"],["elseBranch","Stmt|null"]],
+    "Print" : [["expression", "Expr"]],
 }, 
 `import { Token, LiteralValue } from "./Token.ts"
 import { Stmt } from "./Stmt.ts"`)

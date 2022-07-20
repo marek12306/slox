@@ -11,9 +11,7 @@ varDecl        → "var" IDENTIFIER ( "=" expression )? ";"? ;
 
 statement      → exprStmt
                | forStmt
-               | ifStmt
                | tryStmt
-               | printStmt
                | throwStmt
                | returnStmt
                | break
@@ -31,7 +29,7 @@ foreach        → "each" expression "as" IDENTIFIER ")" statement ;
 
 whileStmt      → "while" expression statement ;
 
-ifStmt         → "if" expression statement
+ifExpr         → "if" expression statement
                ( "else" statement )? ;
 
 tryCatchStmt   → "try" statement "catch" IDENTIFIER? statement ;
@@ -42,7 +40,7 @@ object         → "{" objectValue* "}" ;
 objectValue    → expression ":" expression ","? ;
 
 exprStmt       → expression ";"? ;
-printStmt      → "print" expression ";"? ;
+printExpr      → "print" expression ";"? ;
 throwStmt      → "throw" expression ";"? ;
 
 expression     → assignment ;
@@ -59,10 +57,10 @@ call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* | list ;
 arguments      → expression ( "," expression )* ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" | IDENTIFIER | funDecl | object
-               | "super" "." IDENTIFIER | import ;
+               | "super" "." IDENTIFIER | import | ifExpr | printExpr ;
 funDecl        → "fun" function | logic_or ;
-import         → "import" STRING ;
-function       → IDENTIFIER? "(" parameters? ")" statement ;
+import         → "import" STRING ( "as" IDENTIFIER )? ;
+function       → IDENTIFIER? ("(" parameters? ")")? statement ;
 parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
 list           → "[" listContent? "]" ;
 listContent    → exression ( "," expression )* ;

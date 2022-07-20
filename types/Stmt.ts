@@ -5,9 +5,7 @@ export interface StmtVisitor<R> {
     visitBlockStmt(expr: Block): R;
     visitClassStmt(expr: Class): R;
     visitExpressionStmt(expr: Expression): R;
-    visitIfStmt(expr: If): R;
     visitTryStmt(expr: Try): R;
-    visitPrintStmt(expr: Print): R;
     visitReturnStmt(expr: Return): R;
     visitBreakStmt(expr: Break): R;
     visitVarStmt(expr: Var): R;
@@ -62,23 +60,6 @@ export class Expression extends Stmt {
     }
 }
 
-export class If extends Stmt {
-    condition: Expr
-    thenBranch: Stmt
-    elseBranch: Stmt|null
-
-    constructor(condition: Expr, thenBranch: Stmt, elseBranch: Stmt|null) {
-        super()
-        this.condition = condition
-        this.thenBranch = thenBranch
-        this.elseBranch = elseBranch
-    }
-
-    accept<R>(visitor: StmtVisitor<R>): R {
-        return visitor.visitIfStmt(this)
-    }
-}
-
 export class Try extends Stmt {
     tryBranch: Stmt
     errIdentifier: Token|null
@@ -93,19 +74,6 @@ export class Try extends Stmt {
 
     accept<R>(visitor: StmtVisitor<R>): R {
         return visitor.visitTryStmt(this)
-    }
-}
-
-export class Print extends Stmt {
-    expression: Expr
-
-    constructor(expression: Expr) {
-        super()
-        this.expression = expression
-    }
-
-    accept<R>(visitor: StmtVisitor<R>): R {
-        return visitor.visitPrintStmt(this)
     }
 }
 
@@ -181,4 +149,3 @@ export class Throw extends Stmt {
         return visitor.visitThrowStmt(this)
     }
 }
-

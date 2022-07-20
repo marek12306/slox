@@ -1,5 +1,5 @@
-import { ExprVisitor, Expr, Variable, Assign, Binary, Call, Grouping, Literal, Logical, Unary, Get, Set, This, LFunction, List, LObject, Super, Command } from "./types/Expr.ts"
-import { StmtVisitor, Block, Stmt, Var, Expression, If, Print, Return, While, Class, Break, Try, Throw } from "./types/Stmt.ts"
+import { ExprVisitor, Expr, Variable, Assign, Binary, Call, Print, Grouping, Literal, Logical, Unary, Get, Set, This, LFunction, List, LObject, Super, Command, If } from "./types/Expr.ts"
+import { StmtVisitor, Block, Stmt, Var, Expression, Return, While, Class, Break, Try, Throw } from "./types/Stmt.ts"
 import { Token } from "./types/Token.ts"
 import { Interpreter } from "./Interpreter.ts"
 import { Slox } from "./slox.ts"
@@ -120,7 +120,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
         return null
     }
 
-    visitIfStmt(stmt: If) {
+    visitIfExpr(stmt: If) {
         this.resolve(stmt.condition)
         this.resolve(stmt.thenBranch)
         if (stmt.elseBranch !== null) this.resolve(stmt.elseBranch)
@@ -146,7 +146,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
         return null
     }
 
-    visitPrintStmt(stmt: Print) {
+    visitPrintExpr(stmt: Print) {
         this.resolve(stmt.expression)
         return null
     }

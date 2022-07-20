@@ -1,8 +1,8 @@
-import { ExprVisitor, Literal, Grouping, Expr, Unary, Binary, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command } from "./types/Expr.ts"
+import { ExprVisitor, Literal, Grouping, Expr, Unary, Print, Binary, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command, If } from "./types/Expr.ts"
 import { Token, TokenType } from "./types/Token.ts"
 import { InterpreterBase, ThrBreak, Environment, RuntimeError, ThrReturn } from "./base/InterpreterBase.ts"
 import { Slox } from "./slox.ts"
-import { StmtVisitor, Expression, Print, Stmt, Var, Block, If, While, Return, Class, Try, Throw } from "./types/Stmt.ts"
+import { StmtVisitor, Expression,Stmt, Var, Block, While, Return, Class, Try, Throw } from "./types/Stmt.ts"
 import { SloxCallable } from "./types/SloxCallable.ts"
 import { SloxFunction } from "./types/SloxFunction.ts"
 import { SloxClass } from "./types/SloxClass.ts"
@@ -100,8 +100,7 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
 
     async visitExpressionStmt(stmt: Expression) {
         // console.log("expression", stmt)
-        await this.evaluate(stmt.expression)
-        return null
+        return await this.evaluate(stmt.expression)
     }
 
     async visitListExpr(expr: List): Promise<any> {
@@ -118,11 +117,11 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
         return await generateObject(obj, this)
     }
 
-    async visitPrintStmt(stmt: Print) {
+    async visitPrintExpr(stmt: Print) {
         // console.log("print", stmt)
         let value = await this.evaluate(stmt.expression)
         console.log(await this.prettyStringify(value))
-        return null
+        return value
     }
 
     async visitTryStmt(stmt: Try) {
@@ -165,7 +164,6 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
         // console.log("assign", expr)
         this.line = expr.name.line
         let value = await this.evaluate(expr.value)
-        
         let distance = this.locals.get(expr)
         if (distance != undefined && !isNaN(distance) && isFinite(distance)) {
             this.environment.assignAt(distance, expr.name, value)
@@ -176,13 +174,12 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
         return value
     }
 
-    async visitIfStmt(stmt: If) {
+    async visitIfExpr(stmt: If) {
         if (this.isTruthy(await this.evaluate(stmt.condition))) {
-            await this.execute(stmt.thenBranch)
+            return await stmt.thenBranch.accept(this)
         } else if (stmt.elseBranch !== null) {
-            await this.execute(stmt.elseBranch)
+            return await stmt.elseBranch.accept(this)
         }
-        return null
     }
 
     async visitWhileStmt(stmt: While) {

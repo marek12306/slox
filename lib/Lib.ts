@@ -31,22 +31,8 @@ export async function loadStdLib(interpreter: Interpreter) {
         String.fromCharCode(argumentss[0]), 1)
     interpreter.globals.setFunc("exit", async (interpreter: Interpreter, argumentss: any[]) =>
         Deno.exit(argumentss[0]), 1)
-    interpreter.globals.setFunc("eval", async (interpreter: Interpreter, argumentss: any[]) => {
-        const scanner = new Scanner(argumentss[0], interpreter.slox)
-        const tokens: Token[] = scanner.scanTokens()
-
-        const parser = new Parser(tokens, interpreter.slox)
-        const statements = await parser.parse()
-
-        if (interpreter.slox.hadError) return null
-
-        let resolver = new Resolver(interpreter, interpreter.slox)
-        resolver.resolveStmts(statements)
-        
-        if (interpreter.slox.hadError) return null
-
-        return await interpreter.interpret(statements)
-    }, 1)
+    interpreter.globals.setFunc("eval", async (interpreter: Interpreter, argumentss: any[]) => 
+        interpreter.slox.run(argumentss[0]), 1)
     interpreter.globals.setFunc("instanceof", async (interpreter: Interpreter, argumentss: any[]) => {
         let klass = argumentss[0].klass as SloxClass|null|undefined
         while (true) {
