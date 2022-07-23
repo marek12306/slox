@@ -5,6 +5,7 @@ import { SloxCallable, SloxCallableCall } from "../types/SloxCallable.ts"
 import { Interpreter } from "../Interpreter.ts"
 import { SloxInstance } from "../types/SloxInstance.ts"
 import { SloxClass } from "../types/SloxClass.ts"
+import { generateCallable } from "./utils.ts"
 
 export class RuntimeError extends Error {
     readonly token: Token
@@ -38,20 +39,8 @@ export class Environment extends Map<string, any> {
         this.enclosing = enclosing || null
     }
 
-    async setFunc(name: string, func: SloxCallableCall, arity = 0) {
-        super.set(name, new class implements SloxCallable {
-            _arity = arity
-            name = name
-            func = func
-
-            arity() { return this._arity }
-    
-            async call(interpreter: Interpreter, argumentss: any[]) {
-                return await this.func(interpreter, argumentss)
-            }
-    
-            toString() { return `<native fn ${this.name}>` }
-        })
+    setFunc(name: string, func: SloxCallableCall, arity = 0) {
+        super.set(name, generateCallable(name, func, arity))
     }
 
     getToken(token: Token): any {

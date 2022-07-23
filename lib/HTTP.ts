@@ -9,14 +9,14 @@ import { Token, TokenType } from "../types/Token.ts"
 import { SloxError } from "../types/SloxError.ts"
 import { objFromSloxInstance } from "./JSON.ts"
 
-export let sloxHTTPLib = async (interpreter: Interpreter) => {
+export const sloxHTTPLib = async (interpreter: Interpreter) => {
     interpreter.globals.set("HTTP", await sloxHTTPClass(interpreter))
 }
 
-export let sloxHTTPClass = async (interpreter: Interpreter, env?: Environment) =>
+export const sloxHTTPClass = (interpreter: Interpreter, env?: Environment) =>
     generateLibClass("HTTP", false, env ?? interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 self.fields.set("url", args[0])
                 self.fields.set("headers", args[1])
                 return self
@@ -33,7 +33,7 @@ export let sloxHTTPClass = async (interpreter: Interpreter, env?: Environment) =
             arity: 0
         },
         header: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 self.fields.get("headers").fields.set(args[0], args[1])
             },
             arity: 2

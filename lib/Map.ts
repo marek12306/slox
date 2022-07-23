@@ -14,20 +14,20 @@ export let sloxMapLib = async (interpreter: Interpreter) => {
 export let sloxMapClass = async (interpreter: Interpreter, env?: Environment) =>
     generateLibClass("Map", false, env ?? interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 self.fields.set("_values", new Map())
                 return self
             }
         },
         get: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let map = self.fields.get("_values") as Map<any, any>
                 return map.get(args[0]) ?? null
             },
             arity: 1
         },
         set: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let map = self.fields.get("_values") as Map<any, any>
                 map.set(args[0], args[1])
                 return self
@@ -35,14 +35,14 @@ export let sloxMapClass = async (interpreter: Interpreter, env?: Environment) =>
             arity: 2
         },
         delete: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let map = self.fields.get("_values") as Map<any, any>
                 return map.delete(args[0])
             },
             arity: 1
         },
         has: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let map = self.fields.get("_values") as Map<any, any>
                 return map.has(args[0])
             },
@@ -62,7 +62,7 @@ export let sloxMapClass = async (interpreter: Interpreter, env?: Environment) =>
             arity: 1
         },
         string: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let map = self.fields.get("_values") as Map<any, any>
                 return JSON.stringify([...map])
             }

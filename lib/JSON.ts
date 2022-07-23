@@ -15,12 +15,12 @@ export let sloxJSONLib = async (interpreter: Interpreter) => {
 export let sloxJSONClass = (interpreter: Interpreter, env?: Environment) =>
     generateLibClass("JSON", true, env ?? interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return self
             }
         },
         parse: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let src = args[0] as string, json: any
                 try {
                     json = JSON.parse(src)
@@ -44,7 +44,7 @@ export let sloxJSONClass = (interpreter: Interpreter, env?: Environment) =>
         }
     })
 
-export let objFromSloxInstance = async (arg: any, interpreter: Interpreter) => {
+export const objFromSloxInstance = async (arg: any, interpreter: Interpreter) => {
     let tmp: any = {}
     // console.log(arg)
     for (let [k, v] of arg.fields) {
@@ -83,4 +83,4 @@ export let objFromSloxInstance = async (arg: any, interpreter: Interpreter) => {
         }
     }
     return tmp
-} 
+}

@@ -164,6 +164,7 @@ export class Parser extends ParserBase {
         let keyword = this.previous()
         let filename = this.consume(TokenType.STRING,
             "Expect filename string after 'import'.")
+
         try {
             var file = Deno.readFileSync(filename.literal as string)
         } catch {

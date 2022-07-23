@@ -18,8 +18,11 @@ import { SloxInstance } from "../types/SloxInstance.ts"
 import { Scanner } from "../Scanner.ts"
 import { Parser } from "../Parser.ts"
 import { Resolver } from "../Resolver.ts"
+import { readKeypress } from "https://deno.land/x/keypress@0.0.8/mod.ts";
+import { exec, OutputMode } from "https://deno.land/x/exec/mod.ts";
+import { AnonymousCallable } from "../base/utils.ts"
 
-let range = (start: number, end: number) => 
+const range = (start: number, end: number) => 
     Array(end - start + 1).fill(0).map((_, idx) => start + idx)
 
 export async function loadStdLib(interpreter: Interpreter) {
@@ -108,12 +111,12 @@ export async function generateLibClass(name: string, instance: boolean,
     return klass
 }
 
-let str = (interpreter: Interpreter, s: any) => {
+const str = (interpreter: Interpreter, s: any) => {
     if (typeof s == "string") return `"${s}"`
     return interpreter.stringify(s)
 }
 
-let stringifyFields = (fields: IterableIterator<[any, any]>, interpreter: Interpreter): string => {
+const stringifyFields = (fields: IterableIterator<[any, any]>, interpreter: Interpreter): string => {
     let tmp: string[][] = []
 
     for (let [k, v] of fields) {
@@ -127,16 +130,19 @@ let stringifyFields = (fields: IterableIterator<[any, any]>, interpreter: Interp
     return `{ \n${tmp.map(x => `${x[0]}: ${x[1]}`).join(', \n')} \n}`
 }
 
-let setObj = async (fields: Map<string, any>, obj: any, interpreter: Interpreter, env?: Environment) => {
+const setObj = async (fields: Map<string, any>, obj: any, interpreter: Interpreter, env?: Environment) => {
     for (let i in obj) {
-        if (obj[i] instanceof SloxFunction || typeof(obj[i]) == "number" || typeof(obj[i]) == "boolean") {
+        if (obj[i] instanceof SloxFunction 
+            || typeof(obj[i]) == "number" 
+            || typeof(obj[i]) == "boolean"
+            || obj[i] instanceof SloxClass
+            || (obj[i] instanceof SloxInstance && (obj[i].klass.name == "List" || obj[i].klass.name == "Map"))
+            || obj[i] instanceof AnonymousCallable) {
             fields.set(i, obj[i])
         } else if (obj[i] instanceof SloxInstance && obj[i].klass.name == "Object") {
             fields.set(i, await generateObject(Object.fromEntries(obj[i].fields), interpreter, env ?? interpreter.environment))
         } else if (!(obj[i] instanceof SloxInstance) && !(obj[i] instanceof Array) && obj[i] instanceof Object) {
             fields.set(i, await generateObject(obj[i], interpreter, env ?? interpreter.environment))
-        } else if (obj[i] instanceof SloxInstance && (obj[i].klass.name == "List" || obj[i].klass.name == "Map")) {
-            fields.set(i, obj[i])
         } else if (obj) {
             fields.set(i, await interpreter.prettyStringify(obj[i]))
         }

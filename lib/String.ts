@@ -10,33 +10,39 @@ export let sloxStringLib = async (interpreter: Interpreter) => {
     interpreter.globals.set("String", await sloxStringClassInstance(interpreter))
 }
 
-export let sloxStringClassInstance = async (interpreter: Interpreter) =>
+export let sloxStringClassInstance = (interpreter: Interpreter) =>
     generateLibClass("String", true, interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return self
             }
         },
         repeat: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return args[0].toString(interpreter).repeat(args[1])
             },
             arity: 2
         },
         trim: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return args[0].toString(interpreter).trim()
             },
             arity: 1
         },
+        length: {
+            func: (args: any[], self: SloxInstance) => {
+                return args[0].toString(interpreter).length
+            },
+            arity: 1
+        },
         include: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return args[0].toString(interpreter).includes(args[1])
             },
             arity: 2
         },
         substring: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return args[0].toString(interpreter).substring(args[1], args[2] ?? Infinity)
             },
             arity: 3

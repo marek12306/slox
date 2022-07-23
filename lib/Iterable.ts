@@ -8,20 +8,20 @@ import { sloxListClass } from "./List.ts"
 import { Token, TokenType } from "../types/Token.ts"
 import { SloxError } from "../types/SloxError.ts"
 
-export let sloxIterableLib = async (interpreter: Interpreter) => {
+export const sloxIterableLib = async (interpreter: Interpreter) => {
     interpreter.globals.set("Iterable", await sloxIterableClass(interpreter))
     interpreter.globals.set("MapIterable", await sloxMapIterableClass(interpreter))
 }
 
-export let sloxMapIterableClass = async (interpreter: Interpreter, env?: Environment) => 
+export const sloxMapIterableClass = async (interpreter: Interpreter, env?: Environment) => 
     generateLibClass("MapIterable", false, env ?? interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 return self
             }
         },
         iterreset: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let map = self.fields.get("_values") as Map<any, any>
                 self.fields.set("_itereentries", map.entries())
                 return self
@@ -45,7 +45,7 @@ export let sloxMapIterableClass = async (interpreter: Interpreter, env?: Environ
             }
         },
         iterhas: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let iterentries = self.fields.get("_iterentries") as IterableIterator<any>
                 if (!iterentries) {
                     let map = self.fields.get("_values") as Map<any, any>
@@ -59,22 +59,22 @@ export let sloxMapIterableClass = async (interpreter: Interpreter, env?: Environ
         },
     }, interpreter, await sloxIterableClass(interpreter) as SloxClass)
 
-export let sloxIterableClass = (interpreter: Interpreter, env?: Environment) =>
+export const sloxIterableClass = (interpreter: Interpreter, env?: Environment) =>
     generateLibClass("Iterable", false, env ?? interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 self.fields.set("_counter", 0)
                 return self
             }
         },
         iterreset: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 self.fields.set("_counter", 0)
                 return self
             }
         },
         iternext: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 let current = self.fields.get("_counter")
                 let iterGet = self.getPermissive("iterget")
                 if (!iterGet) throw iterError("iterget method is missing", 
@@ -96,16 +96,16 @@ export let sloxIterableClass = (interpreter: Interpreter, env?: Environment) =>
         }
     })
 
-let iterError = async (message: string, interpreter: Interpreter, env?: Environment) => new SloxError(
+const iterError = async (message: string, interpreter: Interpreter, env?: Environment) => new SloxError(
     new Token(TokenType.EOF, '', null, interpreter.line),
     (await sloxIterErrorClass(interpreter, env ?? interpreter.environment) as SloxClass)
         .call(interpreter, [message])
 )
 
-export let sloxIterErrorClass = (interpreter: Interpreter, env?: Environment) =>
+export const sloxIterErrorClass = (interpreter: Interpreter, env?: Environment) =>
     generateLibClass("IterError", false, env ?? interpreter.environment, {
         init: {
-            func: async (args: any[], self: SloxInstance) => {
+            func: (args: any[], self: SloxInstance) => {
                 self.fields.set("message", args[0])
             },
             arity: 1

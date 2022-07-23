@@ -5,6 +5,7 @@ import { AstPrinter } from "./AstPrinter.ts"
 import { Environment, RuntimeError } from "./base/InterpreterBase.ts"
 import { Interpreter } from "./Interpreter.ts"
 import { Resolver } from "./Resolver.ts"
+import { JSPrinter } from "./JSPrinter.ts"
 
 export class Slox {
     hadError = false
@@ -52,6 +53,7 @@ export class Slox {
         }
 
         //console.log(new AstPrinter().print(statements))
+        //console.log(new JSPrinter().print(statements))
         if (interpret) {
             if (!environment) {
                 await interpreter.loadStdLib()
