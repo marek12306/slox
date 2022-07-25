@@ -25,6 +25,24 @@ const sloxFileSeekMode = (interpreter: Interpreter) =>
         }
     }, interpreter)
 
+export const sloxRawBufferClass = (interpreter: Interpreter, env?: Environment) =>
+    generateLibClass("RawBuffer", false, env ?? interpreter.environment, {
+        init: {
+            func: (args: any[], self: SloxInstance) => {
+                if (!(args[0] instanceof ArrayBuffer)) 
+                    throw fileError("RawBuffer requires an ArrayBuffer as its first argument", interpreter)
+                self.fields.set("_data", args[0])
+                return self
+            },
+            arity: 1
+        },
+        length: {
+            func: (args: any[], self: SloxInstance) => {
+                return self.fields.get("_data").length
+            }
+        },
+    }, interpreter)
+
 export const sloxFileClass = async (interpreter: Interpreter, env?: Environment) =>
     generateObject({
         stream: await generateLibClass("File", false, env ?? interpreter.environment, {
@@ -101,10 +119,10 @@ export const sloxFileClass = async (interpreter: Interpreter, env?: Environment)
                 }
             },
             close: {
-                func: (args: any[], self: SloxInstance) => {
+                func: async (args: any[], self: SloxInstance) => {
                     let opened = self.fields.get("_opened")
                     if (!opened) 
-                        throw fileError("File is not opened", 
+                        throw await fileError("File is not opened", 
                             interpreter, env ?? interpreter.environment)
                     opened.close()
                     self.fields.set("_opened", null)
@@ -121,11 +139,22 @@ export const sloxFileClass = async (interpreter: Interpreter, env?: Environment)
                     }
                 }
             }
-        }),
+        }, interpreter),
         read: generateCallable("read", async (interpreter: Interpreter, argumentss: any[]) =>
             Deno.readTextFile(await interpreter.prettyStringify(argumentss[0])), 1),
-        write: generateCallable("write", async (interpreter: Interpreter, argumentss: any[]) =>
-            Deno.writeTextFile(await interpreter.prettyStringify(argumentss[0]), await interpreter.prettyStringify(argumentss[1])), 2),
+        readBuffer: generateCallable("readBuffer", async (interpreter: Interpreter, argumentss: any[]) =>
+            (await sloxRawBufferClass(interpreter, env ?? interpreter.environment) as SloxClass)
+                .call(interpreter, [
+                    (await Deno.readFile(await interpreter.prettyStringify(argumentss[0]))).buffer
+                ])
+            , 1),
+        write: generateCallable("write", async (interpreter: Interpreter, argumentss: any[]) => {
+            if ((argumentss[1] instanceof SloxInstance) && argumentss[1].klass.name == "RawBuffer") {
+                Deno.writeFile(await interpreter.prettyStringify(argumentss[0]), argumentss[1].fields.get("_data"))
+            } else {
+                Deno.writeTextFile(await interpreter.prettyStringify(argumentss[0]), await interpreter.prettyStringify(argumentss[1]))
+            }
+        }, 2),
     }, interpreter, env ?? interpreter.environment)
 
 const fileError = async (message: string, interpreter: Interpreter, env?: Environment) => new SloxError(

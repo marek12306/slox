@@ -1,5 +1,6 @@
 import { Token, LiteralValue } from "./Token.ts"
 import { Stmt } from "./Stmt.ts"
+import { SloxFunctionParam } from "./SloxFunctionParam.ts"
 
 export interface ExprVisitor<R> {
     visitAssignExpr(expr: Assign): R;
@@ -195,10 +196,10 @@ export class List extends Expr {
 
 export class LFunction extends Expr {
     name: Token|null
-    params: Token[]
+    params: SloxFunctionParam[]
     body: Stmt[]
 
-    constructor(name: Token|null, params: Token[], body: Stmt[]) {
+    constructor(name: Token|null, params: SloxFunctionParam[], body: Stmt[]) {
         super()
         this.name = name
         this.params = params

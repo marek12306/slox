@@ -74,6 +74,11 @@ export async function loadStdLib(interpreter: Interpreter) {
         let val = argumentss[2]
         return obj.fields.set(field, val)
     }, 3)
+    interpreter.globals.setFunc("delete", async (interpreter: Interpreter, argumentss: any[]) => {
+        let obj = argumentss[0] as SloxInstance
+        let field = argumentss[1]
+        return obj.fields.delete(field)
+    }, 2)
     interpreter.globals.setFunc("range", async (interpreter: Interpreter, argumentss: any[]) =>
         (await sloxListClass(interpreter, range(argumentss[0], argumentss[1])) as SloxClass).call(interpreter, []), 2)
     await sloxMapLib(interpreter)
@@ -90,7 +95,7 @@ export async function loadStdLib(interpreter: Interpreter) {
 export type LibMethods = { [name: string]: { func: (args: any[], self: SloxInstance) => any, arity?: number } }
 export async function generateLibClass(name: string, instance: boolean, 
                                 env: Environment, methods: LibMethods,
-                                interpreter?: Interpreter, superclass?: SloxClass) {
+                                interpreter: Interpreter, superclass?: SloxClass) {
     let mthds: [string, SloxFunction][] = []
     for (let method in methods) {
         let isInit = method === "init"
@@ -99,7 +104,8 @@ export async function generateLibClass(name: string, instance: boolean,
             new SloxFunction(method, 
                 methods[method].func, 
                 env, 
-                isInit, 
+                isInit,
+                interpreter,
                 methods[method].arity)
         ])
     }
@@ -136,7 +142,7 @@ const setObj = async (fields: Map<string, any>, obj: any, interpreter: Interpret
             || typeof(obj[i]) == "number" 
             || typeof(obj[i]) == "boolean"
             || obj[i] instanceof SloxClass
-            || (obj[i] instanceof SloxInstance && (obj[i].klass.name == "List" || obj[i].klass.name == "Map"))
+            || (obj[i] instanceof SloxInstance && obj[i].klass.name !== "Object")
             || obj[i] instanceof AnonymousCallable) {
             fields.set(i, obj[i])
         } else if (obj[i] instanceof SloxInstance && obj[i].klass.name == "Object") {

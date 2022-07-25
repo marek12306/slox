@@ -49,7 +49,10 @@ export let sloxWebSocketClass = (interpreter: Interpreter, env?: Environment) =>
                     self.fields.set("_socket", socket)
                 }
                 socket.addEventListener("open", async () => {
-                    func.call(interpreter, [])
+                    func.call(interpreter, []).catch((e: RuntimeError) => {
+                        console.log(e.token, e.message)
+                        Deno.exit(1)
+                    })
                 })
             },
             arity: 1
@@ -121,4 +124,4 @@ export let sloxWebSocketClass = (interpreter: Interpreter, env?: Environment) =>
             },
             arity: 1
         }
-    })
+    }, interpreter)

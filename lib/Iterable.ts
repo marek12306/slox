@@ -94,7 +94,7 @@ export const sloxIterableClass = (interpreter: Interpreter, env?: Environment) =
                 return value !== null
             }
         }
-    })
+    }, interpreter)
 
 const iterError = async (message: string, interpreter: Interpreter, env?: Environment) => new SloxError(
     new Token(TokenType.EOF, '', null, interpreter.line),

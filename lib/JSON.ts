@@ -42,7 +42,7 @@ export let sloxJSONClass = (interpreter: Interpreter, env?: Environment) =>
             }, 
             arity: 1
         }
-    })
+    }, interpreter)
 
 export const objFromSloxInstance = async (arg: any, interpreter: Interpreter) => {
     let tmp: any = {}

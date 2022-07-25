@@ -91,8 +91,8 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
         this.currentFunction = type
         this.beginScope()
         for (let param of func.params) {
-            this.declare(param)
-            this.define(param)
+            this.declare(param.token)
+            this.define(param.token)
         }
         this.resolveStmts(func.body)
         this.endScope()

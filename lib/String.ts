@@ -55,4 +55,4 @@ export let sloxStringClassInstance = (interpreter: Interpreter) =>
             },
             arity: 2
         }
-    })
+    }, interpreter)

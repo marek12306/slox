@@ -57,4 +57,4 @@ export let sloxMathClassInstance = (interpreter: Interpreter) =>
             },
             arity: 1
         }
-    })
+    }, interpreter)

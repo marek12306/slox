@@ -33,7 +33,7 @@ generate(Deno.args[0], "Expr", {
     "Literal": [["value", "LiteralValue"]],
     "Command": [["value", "string"]],
     "List": [["token","Token"],["values", "Expr[]"]],
-    "LFunction": [["name","Token|null"],["params","Token[]"],["body","Stmt[]"]],
+    "LFunction": [["name","Token|null"],["params","SloxFunctionParam[]"],["body","Stmt[]"]],
     "LObject": [["names","Expr[]"],["values","Expr[]"]],
     "Logical": [["left", "Expr"],["operator","Token"],["right","Expr"]],
     "Unary": [["operator", "Token"], ["right", "Expr"]],
@@ -42,7 +42,8 @@ generate(Deno.args[0], "Expr", {
     "Print" : [["expression", "Expr"]],
 }, 
 `import { Token, LiteralValue } from "./Token.ts"
-import { Stmt } from "./Stmt.ts"`)
+import { Stmt } from "./Stmt.ts"
+import { SloxFunctionParam } from "./SloxFunctionParam.ts"`)
 
 function generate(output: string, baseName: string, types: Types, imports: string) { 
     const file = Deno.openSync(path.join(output, baseName+".ts"), { write: true, create: true })

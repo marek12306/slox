@@ -5,6 +5,7 @@ import { ParserBase } from "./base/ParserBase.ts"
 import { Stmt,Expression, Var, Block, While, Return, Break, Class, Try, Throw } from "./types/Stmt.ts"
 import { Scanner } from "./Scanner.ts"
 import { Resolver } from "./Resolver.ts"
+import { SloxFunctionParam } from "./types/SloxFunctionParam.ts"
 
 export class Parser extends ParserBase {
     loopDepth = 0
@@ -441,15 +442,19 @@ export class Parser extends ParserBase {
         if (this.check(TokenType.IDENTIFIER))
             name = this.advance()
 
-        let parameters = []
+        let parameters: SloxFunctionParam[] = []
         if (this.consumeOptional(TokenType.LEFT_PAREN)) {
             if (!this.check(TokenType.RIGHT_PAREN))
                 do {
                     if (parameters.length >= 255)
                         this.error(this.peek(), "Can't have more than 255 parameters.")
-
-                    parameters.push(
-                        this.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+                    let identifier = this.consume(TokenType.IDENTIFIER, "Expect parameter name.")
+                    let defaultParam = null, hasDefault = false
+                    if (this.consumeOptional(TokenType.EQUAL)) {
+                        hasDefault = true
+                        defaultParam = await this.expression()
+                    }
+                    parameters.push(new SloxFunctionParam(identifier, defaultParam, hasDefault))
                 } while (this.match(TokenType.COMMA))
 
             this.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")

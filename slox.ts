@@ -48,7 +48,7 @@ export class Slox {
             let resolver = new Resolver(interpreter, this)
             resolver.resolveStmts(statements)
             // console.log(this.interpreter.locals)
-            
+
             if (this.hadError) return null
         }
 

@@ -222,10 +222,20 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
 
         let func = callee as SloxCallable
 
-        if (argumentss.length !== func.arity())
-            throw new RuntimeError(expr.paren, "Expect " +
-                func.arity() + " arguments but got " +
-                argumentss.length + ".")
+        if (func instanceof SloxFunction && func.declaration instanceof LFunction) {
+            if (argumentss.length > func.arity()) {
+                throw new RuntimeError(expr.paren,
+                    `Expected maximum ${func.arity()} arguments but got ${argumentss.length}`)
+            } else if (argumentss.length < func.declaration.params.filter(x => !x.hasDefault).length) {
+                throw new RuntimeError(expr.paren,
+                    `Expected minimum ${func.declaration.params.filter(x => !x.hasDefault).length} arguments but got ${argumentss.length}`)
+            }
+        } else {
+            if (argumentss.length !== func.arity())
+                throw new RuntimeError(expr.paren, "Expect " +
+                    func.arity() + " arguments but got " +
+                    argumentss.length + ".")
+        }
 
         return await func.call(this, argumentss)
     }
@@ -248,7 +258,7 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
     }
 
     visitLFunctionExpr(stmt: LFunction) {
-        let lfunction = new SloxFunction(stmt.name?.lexeme ?? "", stmt, this.environment, false)
+        let lfunction = new SloxFunction(stmt.name?.lexeme ?? "", stmt, this.environment, false, this)
         if (stmt.name) {
             this.line = stmt.name.line
             this.environment.set(stmt.name.lexeme, lfunction)
@@ -290,7 +300,7 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
         let methods = new Map()
         for (let method of stmt.methods) {
             let func = new SloxFunction(method.name?.lexeme ?? "", method, this.environment,
-                method.name?.lexeme === "init")
+                method.name?.lexeme === "init", this)
             methods.set(method.name?.lexeme, func)
         }
 
