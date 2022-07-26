@@ -79,6 +79,36 @@ export async function loadStdLib(interpreter: Interpreter) {
         let field = argumentss[1]
         return obj.fields.delete(field)
     }, 2)
+    interpreter.globals.setFunc("uri", async (interpreter: Interpreter, argumentss: any[]) =>
+        argumentss[1] ? encodeURIComponent(argumentss[0]) : encodeURI(argumentss[0]), 2)
+    interpreter.globals.setFunc("type", async (interpreter: Interpreter, argumentss: any[]) => {
+        if (typeof argumentss[0] == "number") {
+            return "int"
+        } else if (typeof argumentss[0] == "string") {
+            return "string"
+        } else if (typeof argumentss[0] == "boolean") {
+            return "bool"
+        } else if (argumentss[0] == null) {
+            return "nil"
+        } else if (argumentss[0] instanceof SloxInstance) {
+            return argumentss[0].klass.name
+        } else if (argumentss[0] instanceof SloxFunction) {
+            return "function"
+        } else {
+            return  "unknown"
+        }
+    }, 1)
+    interpreter.globals.setFunc("toint", async (interpreter: Interpreter, argumentss: any[]) => {
+        if (typeof argumentss[0] == "number") {
+            return argumentss[0]
+        } else if (typeof argumentss[0] == "string") {
+            return parseInt(argumentss[0])
+        } else if (typeof argumentss[0] == "boolean") {
+            return argumentss[0] ? 1 : 0
+        } else {
+            return 0
+        }
+    }, 1)
     interpreter.globals.setFunc("range", async (interpreter: Interpreter, argumentss: any[]) =>
         (await sloxListClass(interpreter, range(argumentss[0], argumentss[1])) as SloxClass).call(interpreter, []), 2)
     await sloxMapLib(interpreter)
@@ -138,12 +168,22 @@ const stringifyFields = (fields: IterableIterator<[any, any]>, interpreter: Inte
 
 const setObj = async (fields: Map<string, any>, obj: any, interpreter: Interpreter, env?: Environment) => {
     for (let i in obj) {
-        if (obj[i] instanceof SloxFunction 
+        if (obj[i] instanceof Array) {
+            fields.set(i, await (await sloxListClass(interpreter, await Promise.all(obj[i].map(async (x: any) => {
+                if (typeof x == "object" && !(x instanceof SloxInstance)
+                    && !(x instanceof SloxFunction)
+                    && !(x instanceof SloxClass)) {
+                        return generateObject(x, interpreter, env ?? interpreter.environment)
+                }
+                return x
+            }))) as SloxClass).call(interpreter, []))
+        } else if (obj[i] instanceof SloxFunction 
             || typeof(obj[i]) == "number" 
             || typeof(obj[i]) == "boolean"
             || obj[i] instanceof SloxClass
             || (obj[i] instanceof SloxInstance && obj[i].klass.name !== "Object")
-            || obj[i] instanceof AnonymousCallable) {
+            || obj[i] instanceof AnonymousCallable
+            || obj[i] == null) {
             fields.set(i, obj[i])
         } else if (obj[i] instanceof SloxInstance && obj[i].klass.name == "Object") {
             fields.set(i, await generateObject(Object.fromEntries(obj[i].fields), interpreter, env ?? interpreter.environment))

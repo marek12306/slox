@@ -8,7 +8,6 @@ export interface StmtVisitor<R> {
     visitTryStmt(expr: Try): R;
     visitReturnStmt(expr: Return): R;
     visitBreakStmt(expr: Break): R;
-    visitVarStmt(expr: Var): R;
     visitWhileStmt(expr: While): R;
     visitThrowStmt(expr: Throw): R;
 }
@@ -105,21 +104,6 @@ export class Break extends Stmt {
     }
 }
 
-export class Var extends Stmt {
-    name: Token
-    initializer: Expr
-
-    constructor(name: Token, initializer: Expr) {
-        super()
-        this.name = name
-        this.initializer = initializer
-    }
-
-    accept<R>(visitor: StmtVisitor<R>): R {
-        return visitor.visitVarStmt(this)
-    }
-}
-
 export class While extends Stmt {
     condition: Expr
     body: Stmt
@@ -149,4 +133,3 @@ export class Throw extends Stmt {
         return visitor.visitThrowStmt(this)
     }
 }
-

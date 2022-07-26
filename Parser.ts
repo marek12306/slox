@@ -1,8 +1,8 @@
 import { Token, TokenType } from "./types/Token.ts"
-import { Expr, Binary, Unary, Literal, Print, Grouping, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command, If } from "./types/Expr.ts"
+import { Expr, Binary, Unary, Literal, Print, Grouping, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command, If, Var } from "./types/Expr.ts"
 import { Slox } from "./slox.ts"
 import { ParserBase } from "./base/ParserBase.ts"
-import { Stmt,Expression, Var, Block, While, Return, Break, Class, Try, Throw } from "./types/Stmt.ts"
+import { Stmt,Expression, Block, While, Return, Break, Class, Try, Throw } from "./types/Stmt.ts"
 import { Scanner } from "./Scanner.ts"
 import { Resolver } from "./Resolver.ts"
 import { SloxFunctionParam } from "./types/SloxFunctionParam.ts"
@@ -187,7 +187,7 @@ export class Parser extends ParserBase {
         }
     }
 
-    async primary(): Expr {
+    async primary(): Promise<Expr> {
         if (this.match(TokenType.FALSE)) return new Literal(false)
         if (this.match(TokenType.TRUE)) return new Literal(true)
         if (this.match(TokenType.NIL)) return new Literal(null)
@@ -216,6 +216,7 @@ export class Parser extends ParserBase {
         if (this.match(TokenType.IMPORT)) return await this.import()
         if (this.match(TokenType.IF)) return await this.ifExpression()
         if (this.match(TokenType.PRINT)) return await this.printExpression()
+        if (this.match(TokenType.VAR)) return await this.varDeclaration()
 
         throw this.error(this.peek(), "Expect expression.")
     }
@@ -305,8 +306,8 @@ export class Parser extends ParserBase {
         let variden = new Token(TokenType.IDENTIFIER, "_" + identifier.lexeme, null, identifier.line)
         let isnotequal = new Token(TokenType.IDENTIFIER, "!=", null, identifier.line)
         let body = new Block([
-            new Var(identifier, new Literal(null)),
-            new Var(variden, expression),
+            new Expression(new Var(identifier, new Literal(null))),
+            new Expression(new Var(variden, expression)),
             new Expression(
                 new Call(
                     new Get(identifier, new Variable(variden), iterreset),
@@ -347,7 +348,7 @@ export class Parser extends ParserBase {
             initializer = null
         } else {
             if (this.match(TokenType.VAR)) {
-                initializer = await this.varDeclaration(false)
+                initializer = new Expression(await this.varDeclaration(false))
             } else {
                 initializer = await this.expressionStatement(false)
             }
@@ -493,7 +494,6 @@ export class Parser extends ParserBase {
     async declaration(): Promise<Stmt> {
         try {
             if (this.match(TokenType.CLASS)) return await this.classDeclaration()
-            if (this.match(TokenType.VAR)) return await this.varDeclaration()
 
             return await this.statement()
         } catch (error) {

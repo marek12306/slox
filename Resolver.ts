@@ -1,5 +1,5 @@
-import { ExprVisitor, Expr, Variable, Assign, Binary, Call, Print, Grouping, Literal, Logical, Unary, Get, Set, This, LFunction, List, LObject, Super, Command, If } from "./types/Expr.ts"
-import { StmtVisitor, Block, Stmt, Var, Expression, Return, While, Class, Break, Try, Throw } from "./types/Stmt.ts"
+import { ExprVisitor, Expr, Variable, Assign, Binary, Call, Print, Grouping, Literal, Logical, Unary, Get, Set, This, LFunction, List, Var, LObject, Super, Command, If } from "./types/Expr.ts"
+import { StmtVisitor, Block, Stmt, Expression, Return, While, Class, Break, Try, Throw } from "./types/Stmt.ts"
 import { Token } from "./types/Token.ts"
 import { Interpreter } from "./Interpreter.ts"
 import { Slox } from "./slox.ts"
@@ -60,7 +60,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
         this.peek().set(name.lexeme, true)
     }
 
-    visitVarStmt(stmt: Var) {
+    visitVarExpr(stmt: Var) {
         this.declare(stmt.name)
         if (stmt.initializer)
             this.resolve(stmt.initializer)

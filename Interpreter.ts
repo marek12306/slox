@@ -1,8 +1,8 @@
-import { ExprVisitor, Literal, Grouping, Expr, Unary, Print, Binary, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command, If } from "./types/Expr.ts"
+import { ExprVisitor, Literal, Grouping, Expr, Unary, Print, Binary, Variable, Assign, Logical, Call, Get, Set, This, LFunction, List, LObject, Super, Command, If, Var } from "./types/Expr.ts"
 import { Token, TokenType } from "./types/Token.ts"
 import { InterpreterBase, ThrBreak, Environment, RuntimeError, ThrReturn } from "./base/InterpreterBase.ts"
 import { Slox } from "./slox.ts"
-import { StmtVisitor, Expression,Stmt, Var, Block, While, Return, Class, Try, Throw } from "./types/Stmt.ts"
+import { StmtVisitor, Expression,Stmt, Block, While, Return, Class, Try, Throw } from "./types/Stmt.ts"
 import { SloxCallable } from "./types/SloxCallable.ts"
 import { SloxFunction } from "./types/SloxFunction.ts"
 import { SloxClass } from "./types/SloxClass.ts"
@@ -143,7 +143,7 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
         return null
     }
 
-    async visitVarStmt(stmt: Var) {
+    async visitVarExpr(stmt: Var) {
         // console.log("var", stmt)
         this.line = stmt.name.line
         let value = null
@@ -151,7 +151,7 @@ export class Interpreter extends InterpreterBase implements ExprVisitor<any>, St
             value = await this.evaluate(stmt.initializer)
 
         this.environment.set(stmt.name.lexeme, value)
-        return null
+        return value
     }
 
     visitVariableExpr(expr: Variable) {

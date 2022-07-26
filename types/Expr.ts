@@ -21,6 +21,7 @@ export interface ExprVisitor<R> {
     visitVariableExpr(expr: Variable): R;
     visitIfExpr(expr: If): R;
     visitPrintExpr(expr: Print): R;
+    visitVarExpr(expr: Var): R;
 }
 
 export abstract class Expr {
@@ -298,6 +299,21 @@ export class Print extends Expr {
 
     accept<R>(visitor: ExprVisitor<R>): R {
         return visitor.visitPrintExpr(this)
+    }
+}
+
+export class Var extends Expr {
+    name: Token
+    initializer: Expr
+
+    constructor(name: Token, initializer: Expr) {
+        super()
+        this.name = name
+        this.initializer = initializer
+    }
+
+    accept<R>(visitor: ExprVisitor<R>): R {
+        return visitor.visitVarExpr(this)
     }
 }
 

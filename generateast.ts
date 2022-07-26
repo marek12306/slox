@@ -14,7 +14,6 @@ generate(Deno.args[0], "Stmt", {
     "Try": [["tryBranch","Stmt"],["errIdentifier","Token|null"],["catchBranch","Stmt"]],
     "Return": [["keyword","Token"],["value","Expr|null"]],
     "Break": [["keyword","Token"]],
-    "Var": [["name", "Token"], ["initializer", "Expr"]],
     "While": [["condition","Expr"],["body","Stmt"]],
     "Throw": [["keyword","Token"],["expression","Expr"]],
 }, 
@@ -40,6 +39,7 @@ generate(Deno.args[0], "Expr", {
     "Variable": [["name", "Token"]],
     "If": [["condition", "Expr"],["thenBranch","Stmt"],["elseBranch","Stmt|null"]],
     "Print" : [["expression", "Expr"]],
+    "Var": [["name", "Token"], ["initializer", "Expr"]],
 }, 
 `import { Token, LiteralValue } from "./Token.ts"
 import { Stmt } from "./Stmt.ts"
